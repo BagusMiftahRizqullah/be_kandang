@@ -22,21 +22,6 @@ model User {
   role         String
   createdAt    DateTime @default(now())
   updateAt     DateTime @updatedAt
-  Auth         Auth[]
 
   @@map("users")
-}
-
-model Auth {
-  id        Int      @id @default(autoincrement())
-  id_user   Int
-  token     String
-  otp       String
-  exp_token DateTime
-  createdAt DateTime @default(now())
-  updateAt  DateTime @updatedAt
-
-  user User @relation(fields: [id_user], references: [id])
-
-  @@map("auths")
 }

@@ -8,39 +8,45 @@ const responseHandler = require('../helpers/responseHandler');
 @Injectable()
 export class AuthService {
   constructor(private prisma: PrismaService) {}
-  getHello(): string {
-    return 'Hello World!';
-  }
 
   async login(req: signinInterface) {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        email: req.email,
-      },
-    });
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          email: req.email,
+        },
+      });
 
-    if (!user)
-      return responseHandler.error(
-        `Your email and password do not match. Please try again`,
-        400,
+      if (!user)
+        return responseHandler.error(
+          `Your email and password do not match. Please try again`,
+          400,
+        );
+
+      const pwMatches = await argon.verify(user.password, req.password);
+
+      if (!pwMatches)
+        return responseHandler.error(
+          `Your email and password do not match. Please try again`,
+          400,
+        );
+      const myToken = user.password;
+      delete user.password;
+
+      return responseHandler.succes(
+        `success`,
+        Object.assign(user, { token: myToken }),
+        200,
       );
-
-    const pwMatches = await argon.verify(user.password, req.password);
-
-    if (!pwMatches)
-      return responseHandler.error(
-        `Your email and password do not match. Please try again`,
-        400,
-      );
-    const myToken = user.password;
-    delete user.password;
-
-    return responseHandler.succes(
-      `success`,
-      Object.assign(user, { token: myToken }),
-      200,
-    );
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          return responseHandler.error(`Server Error`, 500);
+        }
+      }
+    }
   }
+
   async signup(req: authInterface) {
     // Generate pws
     const password = await argon.hash(req.password);
@@ -78,7 +84,7 @@ export class AuthService {
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          return responseHandler.error(`Credentials taken`, 400);
+          return responseHandler.error(`Server Error`, 500);
         }
       }
     }
