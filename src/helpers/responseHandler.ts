@@ -1,22 +1,16 @@
 module.exports = {
-  succes: (res, message, data) => {
-    res
-      .status(200)
-      .json({
-        code: 200,
-        message,
-        data,
-      })
-      .end();
+  succes: (message, data, code) => {
+    return {
+      code: code,
+      message,
+      data: data,
+    };
   },
-  error: (res, message, data) => {
-    res
-      .status(400)
-      .json({
-        code: 400,
-        message,
-        data,
-      })
-      .end();
+  error: (message, code, data) => {
+    return {
+      code: code,
+      message,
+      data: data,
+    };
   },
 };

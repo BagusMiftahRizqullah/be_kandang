@@ -19,19 +19,40 @@ export class AuthService {
       },
     });
 
-    if (user) throw new ForbiddenException('Credentials incorrect');
+    if (!user)
+      return responseHandler.error(
+        `Your email and password do not match. Please try again`,
+        400,
+      );
 
     const pwMatches = await argon.verify(user.password, req.password);
 
-    if (!pwMatches) throw new ForbiddenException('Credentials incorrect');
-
+    if (!pwMatches)
+      return responseHandler.error(
+        `Your email and password do not match. Please try again`,
+        400,
+      );
+    const myToken = user.password;
     delete user.password;
-    return user;
+
+    return responseHandler.succes(
+      `success`,
+      Object.assign(user, { token: myToken }),
+      200,
+    );
   }
   async signup(req: authInterface) {
     // Generate pws
     const password = await argon.hash(req.password);
     try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          email: req.email,
+        },
+      });
+
+      if (user) return responseHandler.error(`This email already exists`, 400);
+
       // Save to db
       const users = await this.prisma.user.create({
         data: {
@@ -52,12 +73,12 @@ export class AuthService {
           updateAt: true,
         },
       });
-      return users;
-      // return responseHandler.succes(req, `success`, users);
+      // return users;
+      return responseHandler.succes(users, `success`, 200);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw new ForbiddenException('Credentials taken');
+          return responseHandler.error(`Credentials taken`, 400);
         }
       }
     }
