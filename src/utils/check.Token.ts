@@ -5,10 +5,7 @@ class CheckToken {
     try {
       const cekHeader = req?.authorization?.split(' ')[1];
 
-      const decoded = jwt.verify(
-        cekHeader,
-        process.env.PRIVATE_KEY || 'ILOVEU3000',
-      );
+      const decoded = jwt.verify(cekHeader, process.env.PRIVATE_KEY);
 
       if (!decoded) {
         return false;

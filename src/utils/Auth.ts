@@ -12,7 +12,6 @@ class Auth {
     ciphertext: string,
   ): Promise<boolean> => {
     const pwMatches = await argon.verify(ciphertext, text);
-    console.log('pwMatches', pwMatches);
     return pwMatches;
   };
 
@@ -21,11 +20,8 @@ class Auth {
     name: string,
     password: string,
   ): string => {
-    console.log('tokensss111', id, name, password);
-    const private_key: string = process.env.PRIVATE_KEY || 'ILOVEU3000';
-    console.log('private_key', private_key);
+    const private_key: string = process.env.PRIVATE_KEY;
     const token: string = jwt.sign({ id, name, password }, private_key);
-    console.log('tokensss', token);
     return token;
   };
 }
