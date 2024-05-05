@@ -1,7 +1,6 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { authInterface, signinInterface } from './interface';
-import * as argon from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 const responseHandler = require('../helpers/responseHandler');
 import Auth from 'src/utils/Auth';

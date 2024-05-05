@@ -1,12 +1,12 @@
 import * as argon from 'argon2';
+const jwt = require('jsonwebtoken');
 
 class CheckToken {
   public static HeaderCheck = async (req) => {
     try {
-      console.log('MYHEADERS', req.authorization);
       const cekHeader = req?.authorization?.split(' ')[1];
-      console.log('MYHEADERSTokens', cekHeader);
-      const decoded = argon.verify(
+
+      const decoded = jwt.verify(
         cekHeader,
         process.env.PRIVATE_KEY || 'ILOVEU3000',
       );

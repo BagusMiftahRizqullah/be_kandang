@@ -10,7 +10,9 @@ export class UserService {
   constructor(private prisma: PrismaService) {}
 
   async UserGet(req) {
-    CheckToken.HeaderCheck(req);
+    const checkTokens = await CheckToken.HeaderCheck(req);
+    if (!checkTokens) return responseHandler.error(`Server Error`, 201);
+
     const getUsers = await this.prisma.user.findMany();
 
     return responseHandler.succes(`success`, getUsers, 200);
