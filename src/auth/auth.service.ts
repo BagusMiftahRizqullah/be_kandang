@@ -4,6 +4,7 @@ import { authInterface, signinInterface } from './interface';
 import * as argon from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 const responseHandler = require('../helpers/responseHandler');
+import Auth from 'src/utils/Auth';
 
 @Injectable()
 export class AuthService {
@@ -23,14 +24,22 @@ export class AuthService {
           400,
         );
 
-      const pwMatches = await argon.verify(user.password, req.password);
+      const pwMatches = await Auth.ComparePws(req.password, user.password);
 
       if (!pwMatches)
         return responseHandler.error(
           `Your email and password do not match. Please try again`,
           400,
         );
-      const myToken = user.password;
+
+      const myToken = await Auth.generateToken(
+        user.id,
+        user.name,
+        user.password,
+      );
+
+      console.log('myToken', myToken);
+
       delete user.password;
 
       return responseHandler.succes(
@@ -49,7 +58,7 @@ export class AuthService {
 
   async signup(req: authInterface) {
     // Generate pws
-    const password = await argon.hash(req.password);
+    const password = await Auth.hash(req.password);
     try {
       const user = await this.prisma.user.findUnique({
         where: {
