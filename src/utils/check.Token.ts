@@ -1,4 +1,3 @@
-import * as argon from 'argon2';
 const jwt = require('jsonwebtoken');
 
 class CheckToken {
